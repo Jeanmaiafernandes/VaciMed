@@ -3,8 +3,41 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/web/index.html</file>
             <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/web/WEB-INF/web.xml</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/web/WEB-INF/views/dashboard/dashboardMedico.jsp</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/web/WEB-INF/views/dashboard/dashboardPaciente.jsp</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/web/WEB-INF/views/login.jsp</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/web/WEB-INF/views/paciente/paciente_listar.jsp</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/web/WEB-INF/views/paciente/paciente_cadastro.jsp</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/web/css/dashboard.css</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/src/java/service/AutenticacaoService.java</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/src/java/model/Medico.java</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/src/java/model/Paciente.java</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/src/java/model/Dose.java</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/src/java/model/Lancamento.java</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/web/css/login.css</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/src/java/dao/LancamentoDAO.java</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/src/java/service/PacienteService.java</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/src/java/dao/PacienteDAO.java</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/src/java/controller/PacienteServlet.java</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/src/java/service/RelatorioAderencia.java</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/src/java/service/VacinacaoService.java</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/src/java/controller/DoseServlet.java</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/src/java/controller/LancamentoServlet.java</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/src/java/dao/MedicoDAO.java</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/src/java/dao/CalendarioVacinaDAO.java</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/src/java/dao/DoseDAO.java</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/src/java/dao/InteracaoDAO.java</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/src/java/controller/LogoutServlet.java</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/src/java/filter/AuthFilter.java</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/src/java/filter/CharacterEncodingFilter.java</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/web/WEB-INF/views/dashboard.jsp</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/web/css/style.css</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/src/java/util/ConnectionFactory.java</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/web/index.jsp</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/nbproject/build-impl.xml</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/src/java/controller/LoginServlet.java</file>
+            <file>file:/C:/Users/jeanm/Documents/NetBeansProjects/VaciMed/src/java/controller/DashboardServlet.java</file>
         </group>
     </open-files>
 </project-private>

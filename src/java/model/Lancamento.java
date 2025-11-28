@@ -1,63 +1,64 @@
+// Lancamento.java
 package model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-/**
- * Representa uma aplicação de dose (realizada) ou um agendamento futuro (RF05, RF06, RF07).
- */
 public class Lancamento {
-    private int id;
-    private int doseId; // Relação N:1 com Dose
-    private int pacienteId; // Relação N:1 com Paciente (Redundante, mas útil para consultas)
-    private int doseSequencia; // Ex: 1ª dose, 2ª dose
+    private int idLancamento;
+    private int idPaciente;
+    private int idDose;
+    private int idCalendarioVacina;
+    private Integer idMedicoAplicador;
     private LocalDate dataPrevista;
-    private LocalDate dataAplicacao; // Null se pendente
-    private String status; // "Pendente", "Aplicada", "Atrasada"
-    private String localAplicacao; // Ex: "Braço esquerdo", "SUS - Posto A"
-
-    // Construtor Completo
-    public Lancamento(int id, int doseId, int pacienteId, int doseSequencia, LocalDate dataPrevista, LocalDate dataAplicacao, String status, String localAplicacao) {
-        this.id = id;
-        this.doseId = doseId;
-        this.pacienteId = pacienteId;
-        this.doseSequencia = doseSequencia;
-        this.dataPrevista = dataPrevista;
-        this.dataAplicacao = dataAplicacao;
-        this.status = status;
-        this.localAplicacao = localAplicacao;
-    }
+    private LocalDate dataAplicacao;
+    private String status;
+    private String loteVacina;
+    private String localAplicacao;
+    private String observacoes;
+    private LocalDateTime dataCriacao;
+    private LocalDateTime dataAtualizacao;
     
-    // Construtor para Criação/Agendamento
-    public Lancamento(int doseId, int pacienteId, int doseSequencia, LocalDate dataPrevista, String status) {
-        this.doseId = doseId;
-        this.pacienteId = pacienteId;
-        this.doseSequencia = doseSequencia;
-        this.dataPrevista = dataPrevista;
-        this.status = status;
-        this.dataAplicacao = null;
-        this.localAplicacao = null;
-    }
-
+    // Construtores, getters e setters
+    public Lancamento() {}
+    
     // Getters e Setters
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
-    public int getDoseId() { return doseId; }
-    public void setDoseId(int doseId) { this.doseId = doseId; }
-    public int getPacienteId() { return pacienteId; }
-    public void setPacienteId(int pacienteId) { this.pacienteId = pacienteId; }
-    public int getDoseSequencia() { return doseSequencia; }
-    public void setDoseSequencia(int doseSequencia) { this.doseSequencia = doseSequencia; }
+    public int getIdLancamento() { return idLancamento; }
+    public void setIdLancamento(int idLancamento) { this.idLancamento = idLancamento; }
+    
+    public int getIdPaciente() { return idPaciente; }
+    public void setIdPaciente(int idPaciente) { this.idPaciente = idPaciente; }
+    
+    public int getIdDose() { return idDose; }
+    public void setIdDose(int idDose) { this.idDose = idDose; }
+    
+    public int getIdCalendarioVacina() { return idCalendarioVacina; }
+    public void setIdCalendarioVacina(int idCalendarioVacina) { this.idCalendarioVacina = idCalendarioVacina; }
+    
+    public Integer getIdMedicoAplicador() { return idMedicoAplicador; }
+    public void setIdMedicoAplicador(Integer idMedicoAplicador) { this.idMedicoAplicador = idMedicoAplicador; }
+    
     public LocalDate getDataPrevista() { return dataPrevista; }
     public void setDataPrevista(LocalDate dataPrevista) { this.dataPrevista = dataPrevista; }
+    
     public LocalDate getDataAplicacao() { return dataAplicacao; }
     public void setDataAplicacao(LocalDate dataAplicacao) { this.dataAplicacao = dataAplicacao; }
+    
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+    
+    public String getLoteVacina() { return loteVacina; }
+    public void setLoteVacina(String loteVacina) { this.loteVacina = loteVacina; }
+    
     public String getLocalAplicacao() { return localAplicacao; }
     public void setLocalAplicacao(String localAplicacao) { this.localAplicacao = localAplicacao; }
-
-    // Método auxiliar para determinar se o lançamento está atrasado
-    public boolean isAtrasada() {
-        return "Pendente".equals(status) && dataPrevista.isBefore(LocalDate.now());
-    }
+    
+    public String getObservacoes() { return observacoes; }
+    public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
+    
+    public LocalDateTime getDataCriacao() { return dataCriacao; }
+    public void setDataCriacao(LocalDateTime dataCriacao) { this.dataCriacao = dataCriacao; }
+    
+    public LocalDateTime getDataAtualizacao() { return dataAtualizacao; }
+    public void setDataAtualizacao(LocalDateTime dataAtualizacao) { this.dataAtualizacao = dataAtualizacao; }
 }

@@ -1,169 +1,246 @@
+// LancamentoDAO.java
 package dao;
 
 import model.Lancamento;
-import util.ConexaoFactory;
+import util.ConnectionFactory;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Gerencia a persistência dos Lançamentos (aplicações e agendamentos).
- */
 public class LancamentoDAO {
-
-    /**
-     * Insere um novo lançamento (agendamento futuro) no banco de dados.
-     */
-    public boolean criar(Lancamento lancamento) {
-        String sql = "INSERT INTO lancamento (dose_id, paciente_id, dose_sequencia, data_prevista, status) VALUES (?, ?, ?, ?, ?)";
-        try (Connection conn = ConexaoFactory.getConnection();
+    
+    public void inserir(Lancamento lancamento) {
+        String sql = "INSERT INTO lancamento (id_paciente, id_dose, id_calendario_vacina, id_medico_aplicador, data_prevista, data_aplicacao, status, lote_vacina, local_aplicacao, observacoes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            stmt.setInt(1, lancamento.getDoseId());
-            stmt.setInt(2, lancamento.getPacienteId());
-            stmt.setInt(3, lancamento.getDoseSequencia());
-            stmt.setDate(4, Date.valueOf(lancamento.getDataPrevista()));
-            stmt.setString(5, lancamento.getStatus());
-
-            int linhasAfetadas = stmt.executeUpdate();
             
-            if (linhasAfetadas > 0) {
-                try (ResultSet rs = stmt.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        lancamento.setId(rs.getInt(1));
-                        return true;
-                    }
-                }
+            stmt.setInt(1, lancamento.getIdPaciente());
+            stmt.setInt(2, lancamento.getIdDose());
+            stmt.setInt(3, lancamento.getIdCalendarioVacina());
+            
+            if (lancamento.getIdMedicoAplicador() != null) {
+                stmt.setInt(4, lancamento.getIdMedicoAplicador());
+            } else {
+                stmt.setNull(4, Types.INTEGER);
             }
-            return false;
-
+            
+            stmt.setDate(5, Date.valueOf(lancamento.getDataPrevista()));
+            
+            if (lancamento.getDataAplicacao() != null) {
+                stmt.setDate(6, Date.valueOf(lancamento.getDataAplicacao()));
+            } else {
+                stmt.setNull(6, Types.DATE);
+            }
+            
+            stmt.setString(7, lancamento.getStatus());
+            stmt.setString(8, lancamento.getLoteVacina());
+            stmt.setString(9, lancamento.getLocalAplicacao());
+            stmt.setString(10, lancamento.getObservacoes());
+            
+            stmt.executeUpdate();
+            
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                lancamento.setIdLancamento(rs.getInt(1));
+            }
+            
         } catch (SQLException e) {
-            System.err.println("Erro ao criar lançamento: " + e.getMessage());
-            e.printStackTrace();
-            return false;
+            throw new RuntimeException("Erro ao inserir lançamento", e);
         }
     }
     
-    /**
-     * Busca um lançamento por ID.
-     */
-    public Lancamento buscarPorId(int id) {
-        String sql = "SELECT * FROM lancamento WHERE id = ?";
-        Lancamento lancamento = null;
+    public void atualizar(Lancamento lancamento) {
+        String sql = "UPDATE lancamento SET data_aplicacao = ?, status = ?, lote_vacina = ?, local_aplicacao = ?, observacoes = ?, id_medico_aplicador = ?, data_atualizacao = CURRENT_TIMESTAMP WHERE id_lancamento = ?";
+        
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            if (lancamento.getDataAplicacao() != null) {
+                stmt.setDate(1, Date.valueOf(lancamento.getDataAplicacao()));
+            } else {
+                stmt.setNull(1, Types.DATE);
+            }
+            
+            stmt.setString(2, lancamento.getStatus());
+            stmt.setString(3, lancamento.getLoteVacina());
+            stmt.setString(4, lancamento.getLocalAplicacao());
+            stmt.setString(5, lancamento.getObservacoes());
+            
+            if (lancamento.getIdMedicoAplicador() != null) {
+                stmt.setInt(6, lancamento.getIdMedicoAplicador());
+            } else {
+                stmt.setNull(6, Types.INTEGER);
+            }
+            
+            stmt.setInt(7, lancamento.getIdLancamento());
+            
+            stmt.executeUpdate();
+            
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao atualizar lançamento", e);
+        }
+    }
+    
+    // Adicionar este método no LancamentoDAO.java
+    public Lancamento buscarPorId(int idLancamento) {
+        String sql = "SELECT l.*, cv.nome_vacina, m.nome as nome_medico " +
+                    "FROM lancamento l " +
+                    "JOIN calendario_vacina cv ON l.id_calendario_vacina = cv.id_calendario_vacina " +
+                    "LEFT JOIN medico m ON l.id_medico_aplicador = m.id_medico " +
+                    "WHERE l.id_lancamento = ?";
 
-        try (Connection conn = ConexaoFactory.getConnection();
+        try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, id);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    lancamento = new Lancamento(
-                        rs.getInt("id"),
-                        rs.getInt("dose_id"),
-                        rs.getInt("paciente_id"),
-                        rs.getInt("dose_sequencia"),
-                        rs.getDate("data_prevista").toLocalDate(),
-                        rs.getDate("data_aplicacao") != null ? rs.getDate("data_aplicacao").toLocalDate() : null,
-                        rs.getString("status"),
-                        rs.getString("local_aplicacao")
-                    );
-                }
+            stmt.setInt(1, idLancamento);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return criarLancamento(rs);
             }
 
         } catch (SQLException e) {
-            System.err.println("Erro ao buscar lançamento por ID: " + e.getMessage());
-            e.printStackTrace();
+            throw new RuntimeException("Erro ao buscar lançamento por ID", e);
         }
-        return lancamento;
+
+        return null;
     }
     
-    /**
-     * Lista todos os lançamentos (aplicados e pendentes) de um paciente (RF06).
-     */
-    public List<Lancamento> listarPorPaciente(int pacienteId) {
+    public List<Lancamento> listarPorPaciente(int idPaciente) {
         List<Lancamento> lancamentos = new ArrayList<>();
-        // Ordena para que os pendentes/atrasados venham primeiro, depois os aplicados
-        String sql = "SELECT * FROM lancamento WHERE paciente_id = ? ORDER BY data_prevista ASC";
-
-        try (Connection conn = ConexaoFactory.getConnection();
+        String sql = "SELECT l.*, cv.nome_vacina, m.nome as nome_medico " +
+                    "FROM lancamento l " +
+                    "JOIN calendario_vacina cv ON l.id_calendario_vacina = cv.id_calendario_vacina " +
+                    "LEFT JOIN medico m ON l.id_medico_aplicador = m.id_medico " +
+                    "WHERE l.id_paciente = ? " +
+                    "ORDER BY l.data_prevista DESC, l.status";
+        
+        try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, pacienteId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Lancamento lancamento = new Lancamento(
-                        rs.getInt("id"),
-                        rs.getInt("dose_id"),
-                        rs.getInt("paciente_id"),
-                        rs.getInt("dose_sequencia"),
-                        rs.getDate("data_prevista").toLocalDate(),
-                        rs.getDate("data_aplicacao") != null ? rs.getDate("data_aplicacao").toLocalDate() : null,
-                        rs.getString("status"),
-                        rs.getString("local_aplicacao")
-                    );
-                    lancamentos.add(lancamento);
-                }
+            
+            stmt.setInt(1, idPaciente);
+            ResultSet rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                lancamentos.add(criarLancamento(rs));
             }
-
+            
         } catch (SQLException e) {
-            System.err.println("Erro ao listar lançamentos por paciente: " + e.getMessage());
-            e.printStackTrace();
+            throw new RuntimeException("Erro ao listar lançamentos do paciente", e);
         }
+        
         return lancamentos;
     }
+    
+    // Adicionar este método no LancamentoDAO.java
+    public List<Lancamento> listarPendentesPorDose(int idDose) {
+        List<Lancamento> lancamentos = new ArrayList<>();
+        String sql = "SELECT l.*, cv.nome_vacina FROM lancamento l " +
+                    "JOIN calendario_vacina cv ON l.id_calendario_vacina = cv.id_calendario_vacina " +
+                    "WHERE l.id_dose = ? AND l.status = 'pendente' " +
+                    "ORDER BY l.data_prevista ASC";
 
-    /**
-     * Atualiza um lançamento com os dados de aplicação (RF05).
-     */
-    public boolean registrarAplicacao(int lancamentoId, LocalDate dataAplicacao, String localAplicacao) {
-        String sql = "UPDATE lancamento SET data_aplicacao = ?, status = 'Aplicada', local_aplicacao = ? WHERE id = ? AND status = 'Pendente'";
-        
-        try (Connection conn = ConexaoFactory.getConnection();
+        try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setDate(1, Date.valueOf(dataAplicacao));
-            stmt.setString(2, localAplicacao);
-            stmt.setInt(3, lancamentoId);
+            stmt.setInt(1, idDose);
+            ResultSet rs = stmt.executeQuery();
 
-            return stmt.executeUpdate() > 0;
+            while (rs.next()) {
+                lancamentos.add(criarLancamento(rs));
+            }
 
         } catch (SQLException e) {
-            System.err.println("Erro ao registrar aplicação: " + e.getMessage());
-            e.printStackTrace();
-            return false;
+            throw new RuntimeException("Erro ao listar lançamentos pendentes por dose", e);
         }
+
+        return lancamentos;
     }
     
-    /**
-     * Encontra o último lançamento aplicado de uma Dose específica.
-     */
-    public Lancamento buscarUltimoAplicado(int doseId) {
-        String sql = "SELECT * FROM lancamento WHERE dose_id = ? AND status = 'Aplicada' ORDER BY dose_sequencia DESC LIMIT 1";
-        Lancamento lancamento = null;
+    public List<Lancamento> listarPendentesPorPaciente(int idPaciente) {
+        List<Lancamento> lancamentos = new ArrayList<>();
+        String sql = "SELECT l.*, cv.nome_vacina FROM lancamento l " +
+                    "JOIN calendario_vacina cv ON l.id_calendario_vacina = cv.id_calendario_vacina " +
+                    "WHERE l.id_paciente = ? AND l.status = 'pendente' " +
+                    "ORDER BY l.data_prevista ASC";
         
-        try (Connection conn = ConexaoFactory.getConnection();
+        try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, doseId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    lancamento = new Lancamento(
-                        rs.getInt("id"),
-                        rs.getInt("dose_id"),
-                        rs.getInt("paciente_id"),
-                        rs.getInt("dose_sequencia"),
-                        rs.getDate("data_prevista").toLocalDate(),
-                        rs.getDate("data_aplicacao") != null ? rs.getDate("data_aplicacao").toLocalDate() : null,
-                        rs.getString("status"),
-                        rs.getString("local_aplicacao")
-                    );
-                }
+            
+            stmt.setInt(1, idPaciente);
+            ResultSet rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                lancamentos.add(criarLancamento(rs));
             }
+            
         } catch (SQLException e) {
-            System.err.println("Erro ao buscar último aplicado: " + e.getMessage());
-            e.printStackTrace();
+            throw new RuntimeException("Erro ao listar lançamentos pendentes", e);
         }
+        
+        return lancamentos;
+    }
+    
+    public List<Lancamento> listarProximosPorMedico(int idMedico, int dias) {
+        List<Lancamento> lancamentos = new ArrayList<>();
+        String sql = "SELECT l.*, cv.nome_vacina, p.nome as nome_paciente " +
+                    "FROM lancamento l " +
+                    "JOIN calendario_vacina cv ON l.id_calendario_vacina = cv.id_calendario_vacina " +
+                    "JOIN paciente p ON l.id_paciente = p.id_paciente " +
+                    "WHERE p.id_medico = ? AND l.status = 'pendente' " +
+                    "AND l.data_prevista BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL ? DAY) " +
+                    "ORDER BY l.data_prevista ASC";
+        
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, idMedico);
+            stmt.setInt(2, dias);
+            ResultSet rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                lancamentos.add(criarLancamento(rs));
+            }
+            
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao listar próximos lançamentos", e);
+        }
+        
+        return lancamentos;
+    }
+    
+    private Lancamento criarLancamento(ResultSet rs) throws SQLException {
+        Lancamento lancamento = new Lancamento();
+        lancamento.setIdLancamento(rs.getInt("id_lancamento"));
+        lancamento.setIdPaciente(rs.getInt("id_paciente"));
+        lancamento.setIdDose(rs.getInt("id_dose"));
+        lancamento.setIdCalendarioVacina(rs.getInt("id_calendario_vacina"));
+        
+        int idMedicoAplicador = rs.getInt("id_medico_aplicador");
+        if (!rs.wasNull()) {
+            lancamento.setIdMedicoAplicador(idMedicoAplicador);
+        }
+        
+        lancamento.setDataPrevista(rs.getDate("data_prevista").toLocalDate());
+        
+        Date dataAplicacao = rs.getDate("data_aplicacao");
+        if (dataAplicacao != null) {
+            lancamento.setDataAplicacao(dataAplicacao.toLocalDate());
+        }
+        
+        lancamento.setStatus(rs.getString("status"));
+        lancamento.setLoteVacina(rs.getString("lote_vacina"));
+        lancamento.setLocalAplicacao(rs.getString("local_aplicacao"));
+        lancamento.setObservacoes(rs.getString("observacoes"));
+        lancamento.setDataCriacao(rs.getTimestamp("data_criacao").toLocalDateTime());
+        
+        Timestamp dataAtualizacao = rs.getTimestamp("data_atualizacao");
+        if (dataAtualizacao != null) {
+            lancamento.setDataAtualizacao(dataAtualizacao.toLocalDateTime());
+        }
+        
         return lancamento;
     }
 }

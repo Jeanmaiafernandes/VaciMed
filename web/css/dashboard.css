@@ -1,0 +1,239 @@
+/* dashboard.css - Estilos específicos do Dashboard */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    text-align: center;
+    border-left: 4px solid;
+    transition: transform 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #666;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.action-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: all 0.3s;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    border: 2px solid transparent;
+}
+
+.action-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    border-color: var(--primary);
+}
+
+.action-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.action-card h3 {
+    margin-bottom: 0.5rem;
+    color: var(--dark);
+}
+
+.action-card p {
+    color: var(--gray);
+    font-size: 0.9rem;
+}
+
+/* Cards de status */
+.urgent {
+    background: #fff5f5;
+    border-left: 4px solid #e53e3e;
+}
+
+.today {
+    background: #f0fff4;
+    border-left: 4px solid #38a169;
+}
+
+.upcoming {
+    background: #ebf8ff;
+    border-left: 4px solid #3182ce;
+}
+
+/* Dashboard header especial */
+.dashboard-welcome {
+    text-align: center;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.dashboard-welcome h1 {
+    margin-bottom: 0.5rem;
+    font-size: 2.5rem;
+}
+
+.dashboard-welcome p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+/* Cards de aplicação */
+.appointment-card {
+    background: white;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+    border-left: 4px solid;
+}
+
+.appointment-card.today {
+    border-left-color: #38a169;
+    background: #f0fff4;
+}
+
+.appointment-card.urgent {
+    border-left-color: #e53e3e;
+    background: #fff5f5;
+}
+
+.appointment-card.upcoming {
+    border-left-color: #3182ce;
+    background: #ebf8ff;
+}
+
+.appointment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.appointment-title {
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.appointment-date {
+    color: var(--gray);
+    font-size: 0.9rem;
+}
+
+.appointment-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.appointment-patient {
+    color: var(--gray);
+    font-size: 0.9rem;
+}
+
+/* Grid de resumo */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.summary-item {
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.summary-item h4 {
+    margin-bottom: 0.5rem;
+    color: var(--dark);
+}
+
+.summary-item .number {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary);
+}
+
+/* Alertas personalizados */
+.alert-custom {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border-left: 4px solid;
+}
+
+.alert-custom.error {
+    background: #fff5f5;
+    border-left-color: #e53e3e;
+    color: #c53030;
+}
+
+.alert-custom.warning {
+    background: #fffaf0;
+    border-left-color: #dd6b20;
+    color: #c05621;
+}
+
+.alert-custom.success {
+    background: #f0fff4;
+    border-left-color: #38a169;
+    color: #2d773d;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+    
+    .appointment-details {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .action-card {
+        padding: 1rem;
+    }
+}

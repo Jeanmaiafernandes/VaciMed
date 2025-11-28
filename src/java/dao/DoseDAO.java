@@ -1,117 +1,110 @@
+// DoseDAO.java
 package dao;
 
 import model.Dose;
-import util.ConexaoFactory;
+import util.ConnectionFactory;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Gerencia a persistência das Doses/Esquemas Terapêuticos.
- */
 public class DoseDAO {
-
-    /**
-     * Insere um novo esquema de dose no banco de dados (RF03).
-     * @return O ID gerado ou -1 em caso de falha.
-     */
-    public int criar(Dose dose) {
-        String sql = "INSERT INTO dose (nome, num_doses, periodicidade_valor, periodicidade_unidade, paciente_id, medicamentos_interacao) VALUES (?, ?, ?, ?, ?, ?)";
-        try (Connection conn = ConexaoFactory.getConnection();
+    
+    public void inserir(Dose dose) {
+        String sql = "INSERT INTO dose (id_paciente, id_calendario_vacina, tipo_dose, descricao, periodicidade_meses, doses_previstas, data_inicio, data_termino, status, observacoes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            stmt.setString(1, dose.getNome());
-            stmt.setInt(2, dose.getNumDoses());
-            stmt.setInt(3, dose.getPeriodicidadeValor());
-            stmt.setString(4, dose.getPeriodicidadeUnidade());
-            stmt.setInt(5, dose.getPacienteId());
-            stmt.setString(6, dose.getMedicamentosInteracao());
-
-            int linhasAfetadas = stmt.executeUpdate();
             
-            if (linhasAfetadas > 0) {
-                try (ResultSet rs = stmt.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        dose.setId(rs.getInt(1));
-                        return dose.getId();
-                    }
-                }
+            stmt.setInt(1, dose.getIdPaciente());
+            stmt.setInt(2, dose.getIdCalendarioVacina());
+            stmt.setString(3, dose.getTipoDose());
+            stmt.setString(4, dose.getDescricao());
+            stmt.setInt(5, dose.getPeriodicidadeMeses());
+            stmt.setInt(6, dose.getDosesPrevistas());
+            stmt.setDate(7, dose.getDataInicio() != null ? Date.valueOf(dose.getDataInicio()) : null);
+            stmt.setDate(8, dose.getDataTermino() != null ? Date.valueOf(dose.getDataTermino()) : null);
+            stmt.setString(9, dose.getStatus());
+            stmt.setString(10, dose.getObservacoes());
+            
+            stmt.executeUpdate();
+            
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                dose.setIdDose(rs.getInt(1));
             }
-            return -1;
-
+            
         } catch (SQLException e) {
-            System.err.println("Erro ao criar dose: " + e.getMessage());
-            e.printStackTrace();
-            return -1;
+            throw new RuntimeException("Erro ao inserir dose", e);
         }
     }
-
-    /**
-     * Lista todos os esquemas de dose de um paciente (RF04).
-     */
-    public List<Dose> listarPorPaciente(int pacienteId) {
+    
+    public List<Dose> listarPorPaciente(int idPaciente) {
         List<Dose> doses = new ArrayList<>();
-        String sql = "SELECT * FROM dose WHERE paciente_id = ? ORDER BY nome";
-
-        try (Connection conn = ConexaoFactory.getConnection();
+        String sql = "SELECT d.*, cv.nome_vacina FROM dose d " +
+                    "JOIN calendario_vacina cv ON d.id_calendario_vacina = cv.id_calendario_vacina " +
+                    "WHERE d.id_paciente = ? AND d.status != 'inativo'";
+        
+        try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, pacienteId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Dose dose = new Dose(
-                        rs.getInt("id"),
-                        rs.getString("nome"),
-                        rs.getInt("num_doses"),
-                        rs.getInt("periodicidade_valor"),
-                        rs.getString("periodicidade_unidade"),
-                        rs.getInt("paciente_id"),
-                        rs.getString("medicamentos_interacao")
-                    );
-                    doses.add(dose);
-                }
+            
+            stmt.setInt(1, idPaciente);
+            ResultSet rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                doses.add(criarDose(rs));
             }
-
+            
         } catch (SQLException e) {
-            System.err.println("Erro ao listar doses por paciente: " + e.getMessage());
-            e.printStackTrace();
+            throw new RuntimeException("Erro ao listar doses do paciente", e);
         }
+        
         return doses;
     }
     
-    /**
-     * Busca uma dose por ID.
-     */
-    public Dose buscarPorId(int id) {
-        String sql = "SELECT * FROM dose WHERE id = ?";
-        Dose dose = null;
-
-        try (Connection conn = ConexaoFactory.getConnection();
+    public Dose buscarPorId(int idDose) {
+        String sql = "SELECT d.*, cv.nome_vacina FROM dose d " +
+                    "JOIN calendario_vacina cv ON d.id_calendario_vacina = cv.id_calendario_vacina " +
+                    "WHERE d.id_dose = ?";
+        
+        try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, id);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    dose = new Dose(
-                        rs.getInt("id"),
-                        rs.getString("nome"),
-                        rs.getInt("num_doses"),
-                        rs.getInt("periodicidade_valor"),
-                        rs.getString("periodicidade_unidade"),
-                        rs.getInt("paciente_id"),
-                        rs.getString("medicamentos_interacao")
-                    );
-                }
+            
+            stmt.setInt(1, idDose);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                return criarDose(rs);
             }
-
+            
         } catch (SQLException e) {
-            System.err.println("Erro ao buscar dose por ID: " + e.getMessage());
-            e.printStackTrace();
+            throw new RuntimeException("Erro ao buscar dose por ID", e);
         }
-        return dose;
+        
+        return null;
     }
-
-    public List<Dose> listarTodos() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    
+    private Dose criarDose(ResultSet rs) throws SQLException {
+        Dose dose = new Dose();
+        dose.setIdDose(rs.getInt("id_dose"));
+        dose.setIdPaciente(rs.getInt("id_paciente"));
+        dose.setIdCalendarioVacina(rs.getInt("id_calendario_vacina"));
+        dose.setTipoDose(rs.getString("tipo_dose"));
+        dose.setDescricao(rs.getString("descricao"));
+        dose.setPeriodicidadeMeses(rs.getInt("periodicidade_meses"));
+        dose.setDosesPrevistas(rs.getInt("doses_previstas"));
+        
+        Date dataInicio = rs.getDate("data_inicio");
+        if (dataInicio != null) {
+            dose.setDataInicio(dataInicio.toLocalDate());
+        }
+        
+        Date dataTermino = rs.getDate("data_termino");
+        if (dataTermino != null) {
+            dose.setDataTermino(dataTermino.toLocalDate());
+        }
+        
+        dose.setStatus(rs.getString("status"));
+        dose.setObservacoes(rs.getString("observacoes"));
+        return dose;
     }
 }

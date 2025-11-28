@@ -1,69 +1,55 @@
+// Dose.java
 package model;
 
-import java.time.temporal.ChronoUnit;
+import java.time.LocalDate;
 
-/**
- * Representa um esquema vacinal ou terapêutico (RF03).
- * Define a substância, periodicidade e número de doses.
- */
 public class Dose {
-    private int id;
-    private String nome; // Ex: "Vacina BCG", "Amoxicilina"
-    private int numDoses; // Número total de doses (ex: 3 doses)
-    private int periodicidadeValor; // Ex: 3
-    private String periodicidadeUnidade; // Ex: "Meses", "Semanas", "Dias"
+    private int idDose;
+    private int idPaciente;
+    private int idCalendarioVacina;
+    private String tipoDose;
+    private String descricao;
+    private int periodicidadeMeses;
+    private int dosesPrevistas;
+    private LocalDate dataInicio;
+    private LocalDate dataTermino;
+    private String status;
+    private String observacoes;
     
-    // Campo para Relação 1:N com Paciente
-    private int pacienteId; 
-
-    // Campo para RF08 (Interação) - Opcional, pode ser simples por enquanto
-    private String medicamentosInteracao; 
-
-    // Construtor Completo
-    public Dose(int id, String nome, int numDoses, int periodicidadeValor, String periodicidadeUnidade, int pacienteId, String medicamentosInteracao) {
-        this.id = id;
-        this.nome = nome;
-        this.numDoses = numDoses;
-        this.periodicidadeValor = periodicidadeValor;
-        this.periodicidadeUnidade = periodicidadeUnidade;
-        this.pacienteId = pacienteId;
-        this.medicamentosInteracao = medicamentosInteracao;
-    }
-
-    // Construtor para Criação
-    public Dose(String nome, int numDoses, int periodicidadeValor, String periodicidadeUnidade, int pacienteId, String medicamentosInteracao) {
-        this.nome = nome;
-        this.numDoses = numDoses;
-        this.periodicidadeValor = periodicidadeValor;
-        this.periodicidadeUnidade = periodicidadeUnidade;
-        this.pacienteId = pacienteId;
-        this.medicamentosInteracao = medicamentosInteracao;
-    }
-    
-    // Converte a unidade de periodicidade para ChronoUnit para facilitar os cálculos de data (RF07)
-    public ChronoUnit getPeriodicidadeChronoUnit() {
-        switch (periodicidadeUnidade.toUpperCase()) {
-            case "DIAS": return ChronoUnit.DAYS;
-            case "SEMANAS": return ChronoUnit.WEEKS;
-            case "MESES": return ChronoUnit.MONTHS;
-            case "ANOS": return ChronoUnit.YEARS;
-            default: return ChronoUnit.DAYS;
-        }
-    }
+    // Construtores, getters e setters
+    public Dose() {}
     
     // Getters e Setters
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
-    public String getNome() { return nome; }
-    public void setNome(String nome) { this.nome = nome; }
-    public int getNumDoses() { return numDoses; }
-    public void setNumDoses(int numDoses) { this.numDoses = numDoses; }
-    public int getPeriodicidadeValor() { return periodicidadeValor; }
-    public void setPeriodicidadeValor(int periodicidadeValor) { this.periodicidadeValor = periodicidadeValor; }
-    public String getPeriodicidadeUnidade() { return periodicidadeUnidade; }
-    public void setPeriodicidadeUnidade(String periodicidadeUnidade) { this.periodicidadeUnidade = periodicidadeUnidade; }
-    public int getPacienteId() { return pacienteId; }
-    public void setPacienteId(int pacienteId) { this.pacienteId = pacienteId; }
-    public String getMedicamentosInteracao() { return medicamentosInteracao; }
-    public void setMedicamentosInteracao(String medicamentosInteracao) { this.medicamentosInteracao = medicamentosInteracao; }
+    public int getIdDose() { return idDose; }
+    public void setIdDose(int idDose) { this.idDose = idDose; }
+    
+    public int getIdPaciente() { return idPaciente; }
+    public void setIdPaciente(int idPaciente) { this.idPaciente = idPaciente; }
+    
+    public int getIdCalendarioVacina() { return idCalendarioVacina; }
+    public void setIdCalendarioVacina(int idCalendarioVacina) { this.idCalendarioVacina = idCalendarioVacina; }
+    
+    public String getTipoDose() { return tipoDose; }
+    public void setTipoDose(String tipoDose) { this.tipoDose = tipoDose; }
+    
+    public String getDescricao() { return descricao; }
+    public void setDescricao(String descricao) { this.descricao = descricao; }
+    
+    public int getPeriodicidadeMeses() { return periodicidadeMeses; }
+    public void setPeriodicidadeMeses(int periodicidadeMeses) { this.periodicidadeMeses = periodicidadeMeses; }
+    
+    public int getDosesPrevistas() { return dosesPrevistas; }
+    public void setDosesPrevistas(int dosesPrevistas) { this.dosesPrevistas = dosesPrevistas; }
+    
+    public LocalDate getDataInicio() { return dataInicio; }
+    public void setDataInicio(LocalDate dataInicio) { this.dataInicio = dataInicio; }
+    
+    public LocalDate getDataTermino() { return dataTermino; }
+    public void setDataTermino(LocalDate dataTermino) { this.dataTermino = dataTermino; }
+    
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+    
+    public String getObservacoes() { return observacoes; }
+    public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
 }
