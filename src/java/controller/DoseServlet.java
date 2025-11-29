@@ -1,9 +1,6 @@
-// DoseServlet.java
 package controller;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -11,125 +8,105 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import model.Medico;
-import model.Paciente;
 import model.Dose;
-import model.CalendarioVacina;
+import model.Medico;
 import dao.DoseDAO;
-import dao.PacienteDAO;
-import dao.CalendarioVacinaDAO;
-import service.VacinacaoService;
 
-@WebServlet("/dose/*")
+@WebServlet("/dose/nova")
 public class DoseServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private DoseDAO doseDAO;
-    private PacienteDAO pacienteDAO;
-    private CalendarioVacinaDAO calendarioVacinaDAO;
-    private VacinacaoService vacinacaoService;
     
     @Override
     public void init() throws ServletException {
         this.doseDAO = new DoseDAO();
-        this.pacienteDAO = new PacienteDAO();
-        this.calendarioVacinaDAO = new CalendarioVacinaDAO();
-        this.vacinacaoService = new VacinacaoService();
     }
     
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("medico") == null) {
-            response.sendRedirect("login");
-            return;
-        }
-        
-        String action = request.getPathInfo();
-        
         try {
-            if (action == null || action.equals("/")) {
-                listarDosesPorPaciente(request, response);
-            } else if (action.equals("/nova")) {
-                novaDose(request, response);
-            } else {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            HttpSession session = request.getSession();
+            Medico medico = (Medico) session.getAttribute("medico");
+            
+            if (medico == null) {
+                response.sendRedirect(request.getContextPath() + "/login");
+                return;
             }
+            
+            String pacienteId = request.getParameter("pacienteId");
+            String vacinaId = request.getParameter("vacinaId");
+            String doseStr = request.getParameter("dose");
+            
+            // Validação mais robusta
+            if (pacienteId == null || pacienteId.trim().isEmpty() || 
+                vacinaId == null || vacinaId.trim().isEmpty()) {
+                response.sendRedirect(request.getContextPath() + "/calendario?erro=Parâmetros+inválidos");
+                return;
+            }
+            
+            int numeroDose = 1;
+            if (doseStr != null && !doseStr.trim().isEmpty()) {
+                try {
+                    numeroDose = Integer.parseInt(doseStr);
+                } catch (NumberFormatException e) {
+                    // Mantém o valor padrão 1
+                }
+            }
+            
+            request.setAttribute("pacienteId", pacienteId);
+            request.setAttribute("vacinaId", vacinaId);
+            request.setAttribute("numeroDose", numeroDose);
+            
+            request.getRequestDispatcher("/WEB-INF/views/dose-form.jsp").forward(request, response);
+            
         } catch (Exception e) {
-            request.setAttribute("erro", "Erro: " + e.getMessage());
-            request.getRequestDispatcher("/doses.jsp").forward(request, response);
+            e.printStackTrace();
+            response.sendRedirect(request.getContextPath() + "/calendario?erro=Erro+ao+carregar+formulário");
         }
     }
     
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("medico") == null) {
-            response.sendRedirect("login");
-            return;
-        }
-        
-        String action = request.getPathInfo();
-        
         try {
-            if (action == null || action.equals("/")) {
-                cadastrarDose(request, response);
-            } else {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            HttpSession session = request.getSession();
+            Medico medico = (Medico) session.getAttribute("medico");
+            
+            if (medico == null) {
+                response.sendRedirect(request.getContextPath() + "/login");
+                return;
             }
-        } catch (Exception e) {
-            request.setAttribute("erro", "Erro: " + e.getMessage());
-            request.getRequestDispatcher("/dose-form.jsp").forward(request, response);
-        }
-    }
-    
-    private void listarDosesPorPaciente(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        int idPaciente = Integer.parseInt(request.getParameter("pacienteId"));
-        
-        List<Dose> doses = doseDAO.listarPorPaciente(idPaciente);
-        Paciente paciente = pacienteDAO.buscarPorId(idPaciente);
-        
-        request.setAttribute("doses", doses);
-        request.setAttribute("paciente", paciente);
-        request.getRequestDispatcher("/doses.jsp").forward(request, response);
-    }
-    
-    private void novaDose(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        int idPaciente = Integer.parseInt(request.getParameter("pacienteId"));
-        
-        Paciente paciente = pacienteDAO.buscarPorId(idPaciente);
-        List<CalendarioVacina> vacinas = calendarioVacinaDAO.listarTodas();
-        
-        request.setAttribute("paciente", paciente);
-        request.setAttribute("vacinas", vacinas);
-        request.getRequestDispatcher("/dose-form.jsp").forward(request, response);
-    }
-    
-    private void cadastrarDose(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
-        try {
+            
+            // Validação dos parâmetros
+            String pacienteIdStr = request.getParameter("pacienteId");
+            String vacinaIdStr = request.getParameter("vacinaId");
+            String tipoDose = request.getParameter("tipoDose");
+            String dataAplicacao = request.getParameter("dataAplicacao");
+            String descricao = request.getParameter("descricao");
+            String observacoes = request.getParameter("observacoes");
+            
+            if (pacienteIdStr == null || vacinaIdStr == null || dataAplicacao == null) {
+                response.sendRedirect(request.getContextPath() + "/calendario?erro=Dados+obrigatórios+ausentes");
+                return;
+            }
+            
             Dose dose = new Dose();
-            dose.setIdPaciente(Integer.parseInt(request.getParameter("idPaciente")));
-            dose.setIdCalendarioVacina(Integer.parseInt(request.getParameter("idCalendarioVacina")));
-            dose.setTipoDose(request.getParameter("tipoDose"));
-            dose.setDescricao(request.getParameter("descricao"));
-            dose.setPeriodicidadeMeses(Integer.parseInt(request.getParameter("periodicidadeMeses")));
-            dose.setDosesPrevistas(Integer.parseInt(request.getParameter("dosesPrevistas")));
-            dose.setDataInicio(LocalDate.parse(request.getParameter("dataInicio")));
-            dose.setStatus("ativo");
+            dose.setIdPaciente(Integer.parseInt(pacienteIdStr));
+            dose.setIdCalendarioVacina(Integer.parseInt(vacinaIdStr));
+            dose.setTipoDose(tipoDose != null ? tipoDose : "Dose única");
+            dose.setDataInicio(java.sql.Date.valueOf(dataAplicacao));
+            dose.setStatus("APLICADA"); // Use maiúsculo para consistência
+            dose.setDescricao(descricao != null && !descricao.trim().isEmpty() ? descricao : "Dose aplicada");
+            dose.setObservacoes(observacoes);
             
             doseDAO.inserir(dose);
             
-            request.setAttribute("sucesso", "Dose cadastrada com sucesso!");
-            response.sendRedirect(request.getContextPath() + "/dose/?pacienteId=" + dose.getIdPaciente());
+            response.sendRedirect(request.getContextPath() + "/dose/?sucesso=Dose+registrada+com+sucesso");
             
         } catch (Exception e) {
-            request.setAttribute("erro", "Erro ao cadastrar dose: " + e.getMessage());
-            request.getRequestDispatcher("/dose-form.jsp").forward(request, response);
+            e.printStackTrace();
+            response.sendRedirect(request.getContextPath() + "/calendario?erro=Erro+ao+registrar+dose: " + e.getMessage());
         }
     }
 }

@@ -1,6 +1,9 @@
 // MedicoDAO.java
 package dao;
-
+/**
+ *
+ * @author jeanm
+ */
 import model.Medico;
 import util.ConnectionFactory;
 import java.sql.*;

@@ -1,7 +1,6 @@
-// Dose.java
 package model;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 public class Dose {
     private int idDose;
@@ -11,15 +10,19 @@ public class Dose {
     private String descricao;
     private int periodicidadeMeses;
     private int dosesPrevistas;
-    private LocalDate dataInicio;
-    private LocalDate dataTermino;
+    private Date dataInicio;
+    private Date dataTermino;
     private String status;
     private String observacoes;
     
-    // Construtores, getters e setters
+    // Campos adicionais para exibição
+    private String nomePaciente;
+    private String nomeVacina;
+    
+    // Construtores
     public Dose() {}
     
-    // Getters e Setters
+    // Getters e Setters para todos os campos
     public int getIdDose() { return idDose; }
     public void setIdDose(int idDose) { this.idDose = idDose; }
     
@@ -41,15 +44,22 @@ public class Dose {
     public int getDosesPrevistas() { return dosesPrevistas; }
     public void setDosesPrevistas(int dosesPrevistas) { this.dosesPrevistas = dosesPrevistas; }
     
-    public LocalDate getDataInicio() { return dataInicio; }
-    public void setDataInicio(LocalDate dataInicio) { this.dataInicio = dataInicio; }
+    public Date getDataInicio() { return dataInicio; }
+    public void setDataInicio(Date dataInicio) { this.dataInicio = dataInicio; }
     
-    public LocalDate getDataTermino() { return dataTermino; }
-    public void setDataTermino(LocalDate dataTermino) { this.dataTermino = dataTermino; }
+    public Date getDataTermino() { return dataTermino; }
+    public void setDataTermino(Date dataTermino) { this.dataTermino = dataTermino; }
     
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
     
     public String getObservacoes() { return observacoes; }
     public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
+    
+    // Novos getters e setters para campos de exibição
+    public String getNomePaciente() { return nomePaciente; }
+    public void setNomePaciente(String nomePaciente) { this.nomePaciente = nomePaciente; }
+    
+    public String getNomeVacina() { return nomeVacina; }
+    public void setNomeVacina(String nomeVacina) { this.nomeVacina = nomeVacina; }
 }

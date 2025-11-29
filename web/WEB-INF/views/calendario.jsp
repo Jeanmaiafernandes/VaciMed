@@ -1,8 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.List" %>
 <%@ page import="model.CalendarioVacina" %>
+<%@ page import="model.Paciente" %>
 <%
     List<CalendarioVacina> vacinas = (List<CalendarioVacina>) request.getAttribute("vacinas");
+    List<Paciente> pacientes = (List<Paciente>) request.getAttribute("pacientes"); // Nova lista de pacientes
+    
     Object medicoObj = session.getAttribute("medico");
     String nomeMedico = "Médico";
     
@@ -120,7 +123,46 @@
             </div>
             <div class="modal-body">
                 <p>Selecione o paciente para adicionar a vacina: <strong id="vacinaSelecionada"></strong></p>
-                <div id="listaPacientes"></div>
+                
+                <% if (pacientes != null && !pacientes.isEmpty()) { %>
+                    <div class="pacientes-lista">
+                        <% for (Paciente paciente : pacientes) { %>
+                            <div class="paciente-item" data-paciente-id="<%= paciente.getIdPaciente() %>">
+                                <div class="paciente-info">
+                                    <strong class="paciente-nome"><%= paciente.getNome() %></strong>
+                                    <div class="paciente-detalhes">
+
+                                </div>
+                                <button class="btn btn-sm btn-primary" 
+                                        onclick="selecionarPaciente(<%= paciente.getIdPaciente() %>, '<%= paciente.getNome() %>')">
+                                    Selecionar
+                                </button>
+                            </div>
+                        <% } %>
+                    </div>
+                <% } else { %>
+                    <div class="empty-state">
+                        <p>Nenhum paciente cadastrado.</p>
+                        <a href="${pageContext.request.contextPath}/paciente/novo" class="btn btn-primary">
+                            ➕ Cadastrar Primeiro Paciente
+                        </a>
+                    </div>
+                <% } %>
+                
+                <div id="selecaoDose" style="display: none; margin-top: 20px;">
+                    <div class="form-group">
+                        <label for="selectDose">Selecionar Dose:</label>
+                        <select class="form-control" id="selectDose">
+                            <option value="1">Dose 1</option>
+                            <option value="2">Dose 2</option>
+                            <option value="3">Dose 3</option>
+                            <option value="4">Dose de Reforço</option>
+                        </select>
+                    </div>
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <button class="btn btn-primary" onclick="redirecionarParaDose()">Continuar</button>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn" onclick="fecharModal()">Cancelar</button>
@@ -145,32 +187,36 @@
         });
 
         let vacinaAtualId = null;
+        let pacienteSelecionadoId = null;
         
         function adicionarAoPaciente(vacinaId, vacinaNome) {
             vacinaAtualId = vacinaId;
             document.getElementById('vacinaSelecionada').textContent = vacinaNome;
-            
-            // Carregar lista de pacientes (simulação)
-            document.getElementById('listaPacientes').innerHTML = `
-                <div class="form-group">
-                    <select class="form-control" id="selectPaciente">
-                        <option value="">Selecione um paciente...</option>
-                        <option value="1">João Silva</option>
-                        <option value="2">Maria Santos</option>
-                    </select>
-                </div>
-                <div style="text-align: center; margin-top: 1rem;">
-                    <button class="btn btn-primary" onclick="redirecionarParaDose()">Continuar</button>
-                </div>
-            `;
-            
             document.getElementById('modalPaciente').style.display = 'block';
+            
+            // Resetar seleção
+            pacienteSelecionadoId = null;
+            document.getElementById('selecaoDose').style.display = 'none';
+        }
+        
+        function selecionarPaciente(pacienteId, pacienteNome) {
+            pacienteSelecionadoId = pacienteId;
+            document.getElementById('selecaoDose').style.display = 'block';
+            
+            // Destacar paciente selecionado
+            document.querySelectorAll('.paciente-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            event.target.closest('.paciente-item').classList.add('selected');
         }
         
         function redirecionarParaDose() {
-            const pacienteId = document.getElementById('selectPaciente').value;
-            if (pacienteId) {
-                window.location.href = '${pageContext.request.contextPath}/dose/nova?pacienteId=' + pacienteId + '&vacinaId=' + vacinaAtualId;
+            if (pacienteSelecionadoId && vacinaAtualId) {
+                const doseSelecionada = document.getElementById('selectDose').value;
+                window.location.href = '${pageContext.request.contextPath}/dose/nova?pacienteId=' + pacienteSelecionadoId + 
+                                      '&vacinaId=' + vacinaAtualId + '&dose=' + doseSelecionada;
+            } else {
+                alert('Por favor, selecione um paciente primeiro.');
             }
         }
         

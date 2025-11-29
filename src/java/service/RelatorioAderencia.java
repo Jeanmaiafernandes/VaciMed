@@ -1,4 +1,3 @@
-// RelatorioAderencia.java - CORRIGIDO
 package service;
 
 public class RelatorioAderencia {

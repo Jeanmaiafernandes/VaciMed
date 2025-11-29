@@ -1,4 +1,3 @@
-// LancamentoServlet.java - CORRIGIDO
 package controller;
 
 import java.io.IOException;
@@ -11,14 +10,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import model.Medico;
 import model.Lancamento;
-import model.Dose;
+import model.Medico;
 import dao.LancamentoDAO;
 import dao.DoseDAO;
 import service.VacinacaoService;
 
-@WebServlet("/lancamento/*")
+@WebServlet("/lancamento/aplicar")
 public class LancamentoServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private LancamentoDAO lancamentoDAO;
@@ -35,132 +33,80 @@ public class LancamentoServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("medico") == null) {
-            response.sendRedirect("login");
-            return;
-        }
-        
-        Medico medico = (Medico) session.getAttribute("medico");
-        String action = request.getPathInfo();
-        
         try {
-            if (action == null || action.equals("/")) {
-                listarLancamentosPorPaciente(request, response);
-            } else if (action.equals("/aplicar")) {
-                aplicarDose(request, response, medico);
-            } else {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            String idStr = request.getParameter("id");
+            
+            if (idStr == null) {
+                response.sendRedirect(request.getContextPath() + "/lancamento/?erro=ID+inválido");
+                return;
             }
+            
+            int idLancamento = Integer.parseInt(idStr);
+            Lancamento lancamento = lancamentoDAO.buscarPorId(idLancamento);
+            
+            if (lancamento == null) {
+                response.sendRedirect(request.getContextPath() + "/lancamento/?erro=Lançamento+não+encontrado");
+                return;
+            }
+            
+            // Verificar interações medicamentosas
+            List<String> alertas = vacinacaoService.verificarInteracoes(
+                lancamento.getIdPaciente(), 
+                lancamento.getIdCalendarioVacina()
+            );
+            
+            request.setAttribute("lancamento", lancamento);
+            request.setAttribute("alertas", alertas);
+            
+            request.getRequestDispatcher("/WEB-INF/views/lancamento-aplicar.jsp").forward(request, response);
+            
         } catch (Exception e) {
-            request.setAttribute("erro", "Erro: " + e.getMessage());
-            request.getRequestDispatcher("/lancamentos.jsp").forward(request, response);
+            e.printStackTrace();
+            response.sendRedirect(request.getContextPath() + "/lancamento/?erro=Erro+ao+carregar+aplicação");
         }
     }
     
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("medico") == null) {
-            response.sendRedirect("login");
-            return;
-        }
-        
-        Medico medico = (Medico) session.getAttribute("medico");
-        String action = request.getPathInfo();
-        
         try {
-            if (action == null || action.equals("/")) {
-                registrarAplicacao(request, response, medico);
-            } else {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            HttpSession session = request.getSession();
+            Medico medico = (Medico) session.getAttribute("medico");
+            
+            if (medico == null) {
+                response.sendRedirect(request.getContextPath() + "/login");
+                return;
             }
-        } catch (Exception e) {
-            request.setAttribute("erro", "Erro: " + e.getMessage());
-            request.getRequestDispatcher("/lancamento-form.jsp").forward(request, response);
-        }
-    }
-    
-    private void listarLancamentosPorPaciente(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        int idPaciente = Integer.parseInt(request.getParameter("pacienteId"));
-        
-        List<Lancamento> lancamentos = lancamentoDAO.listarPorPaciente(idPaciente);
-        
-        request.setAttribute("lancamentos", lancamentos);
-        request.setAttribute("pacienteId", idPaciente);
-        request.getRequestDispatcher("/lancamentos.jsp").forward(request, response);
-    }
-    
-    private void aplicarDose(HttpServletRequest request, HttpServletResponse response, Medico medico) 
-            throws ServletException, IOException {
-        int idLancamento = Integer.parseInt(request.getParameter("id"));
-        
-        // Precisamos do método buscarPorId no LancamentoDAO - vamos criar um lançamento temporário
-        // Lancamento lancamento = lancamentoDAO.buscarPorId(idLancamento);
-        
-        // Criando um lançamento temporário para demonstração
-        Lancamento lancamento = new Lancamento();
-        lancamento.setIdLancamento(idLancamento);
-        lancamento.setIdPaciente(Integer.parseInt(request.getParameter("pacienteId")));
-        lancamento.setIdDose(Integer.parseInt(request.getParameter("doseId")));
-        lancamento.setIdCalendarioVacina(Integer.parseInt(request.getParameter("vacinaId")));
-        lancamento.setDataPrevista(LocalDate.now());
-        
-        // Buscar a dose
-        Dose dose = doseDAO.buscarPorId(lancamento.getIdDose());
-        
-        if (dose == null) {
-            request.setAttribute("erro", "Dose não encontrada");
-            request.getRequestDispatcher("/lancamentos.jsp").forward(request, response);
-            return;
-        }
-        
-        // RF08 - Verificar interações
-        List<String> alertas = vacinacaoService.verificarInteracoes(
-            lancamento.getIdPaciente(), 
-            lancamento.getIdCalendarioVacina()
-        );
-        
-        request.setAttribute("lancamento", lancamento);
-        request.setAttribute("dose", dose);
-        request.setAttribute("alertas", alertas);
-        request.setAttribute("medico", medico);
-        
-        request.getRequestDispatcher("/lancamento-aplicar.jsp").forward(request, response);
-    }
-    
-    private void registrarAplicacao(HttpServletRequest request, HttpServletResponse response, Medico medico) 
-            throws ServletException, IOException {
-        
-        try {
-            int idLancamento = Integer.parseInt(request.getParameter("idLancamento"));
-            int idPaciente = Integer.parseInt(request.getParameter("idPaciente"));
             
-            // Criar lançamento atualizado
-            Lancamento lancamento = new Lancamento();
-            lancamento.setIdLancamento(idLancamento);
-            lancamento.setIdPaciente(idPaciente);
-            lancamento.setDataAplicacao(LocalDate.now());
-            lancamento.setStatus("aplicada");
-            lancamento.setLoteVacina(request.getParameter("loteVacina"));
-            lancamento.setLocalAplicacao(request.getParameter("localAplicacao"));
-            lancamento.setObservacoes(request.getParameter("observacoes"));
-            lancamento.setIdMedicoAplicador(medico.getIdMedico());
+            String idLancamentoStr = request.getParameter("idLancamento");
+            String doseIdStr = request.getParameter("doseId");
+            String loteVacina = request.getParameter("loteVacina");
+            String localAplicacao = request.getParameter("localAplicacao");
+            String observacoes = request.getParameter("observacoes");
             
-            // Atualizar no banco (precisamos do método atualizar)
-            lancamentoDAO.atualizar(lancamento);
+            if (idLancamentoStr == null) {
+                response.sendRedirect(request.getContextPath() + "/lancamento/?erro=ID+inválido");
+                return;
+            }
             
-            // RF07 - Gerar doses futuras
-            vacinacaoService.gerarDosesFuturas(lancamento);
+            int idLancamento = Integer.parseInt(idLancamentoStr);
+            int doseId = doseIdStr != null ? Integer.parseInt(doseIdStr) : 0;
             
-            request.setAttribute("sucesso", "Aplicação registrada com sucesso!");
-            response.sendRedirect(request.getContextPath() + "/lancamento/?pacienteId=" + idPaciente);
+            // Marcar como aplicado usando o serviço
+            vacinacaoService.marcarComoAplicado(
+                idLancamento,
+                medico.getIdMedico(),
+                loteVacina,
+                localAplicacao,
+                observacoes,
+                doseId
+            );
+            
+            response.sendRedirect(request.getContextPath() + "/lancamento/?sucesso=Aplicação+registrada+com+sucesso");
             
         } catch (Exception e) {
-            request.setAttribute("erro", "Erro ao registrar aplicação: " + e.getMessage());
-            request.getRequestDispatcher("/lancamento-aplicar.jsp").forward(request, response);
+            e.printStackTrace();
+            response.sendRedirect(request.getContextPath() + "/lancamento/?erro=Erro+ao+registrar+aplicação");
         }
     }
 }

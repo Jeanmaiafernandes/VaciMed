@@ -1,4 +1,3 @@
-// PacienteService.java - CORRIGIDO
 package service;
 
 import dao.PacienteDAO;

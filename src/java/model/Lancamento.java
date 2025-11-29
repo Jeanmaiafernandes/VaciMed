@@ -1,42 +1,50 @@
-// Lancamento.java
 package model;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 public class Lancamento {
     private int idLancamento;
     private int idPaciente;
-    private int idDose;
     private int idCalendarioVacina;
-    private Integer idMedicoAplicador;
+    private int idDose;
+    private int idMedicoAplicador;
     private LocalDate dataPrevista;
     private LocalDate dataAplicacao;
     private String status;
     private String loteVacina;
     private String localAplicacao;
     private String observacoes;
-    private LocalDateTime dataCriacao;
-    private LocalDateTime dataAtualizacao;
     
-    // Construtores, getters e setters
+    // Campos adicionais para exibição
+    private String nomePaciente;
+    private String nomeVacina;
+    private String nomeMedicoAplicador;
+    
+    // Construtores
     public Lancamento() {}
     
-    // Getters e Setters
+    public Lancamento(int idPaciente, int idCalendarioVacina, LocalDate dataPrevista, String status) {
+        this.idPaciente = idPaciente;
+        this.idCalendarioVacina = idCalendarioVacina;
+        this.dataPrevista = dataPrevista;
+        this.status = status;
+    }
+    
+    // Getters e Setters para TODOS os campos
     public int getIdLancamento() { return idLancamento; }
     public void setIdLancamento(int idLancamento) { this.idLancamento = idLancamento; }
     
     public int getIdPaciente() { return idPaciente; }
     public void setIdPaciente(int idPaciente) { this.idPaciente = idPaciente; }
     
-    public int getIdDose() { return idDose; }
-    public void setIdDose(int idDose) { this.idDose = idDose; }
-    
     public int getIdCalendarioVacina() { return idCalendarioVacina; }
     public void setIdCalendarioVacina(int idCalendarioVacina) { this.idCalendarioVacina = idCalendarioVacina; }
     
-    public Integer getIdMedicoAplicador() { return idMedicoAplicador; }
-    public void setIdMedicoAplicador(Integer idMedicoAplicador) { this.idMedicoAplicador = idMedicoAplicador; }
+    public int getIdDose() { return idDose; }
+    public void setIdDose(int idDose) { this.idDose = idDose; }
+    
+    public int getIdMedicoAplicador() { return idMedicoAplicador; }
+    public void setIdMedicoAplicador(int idMedicoAplicador) { this.idMedicoAplicador = idMedicoAplicador; }
     
     public LocalDate getDataPrevista() { return dataPrevista; }
     public void setDataPrevista(LocalDate dataPrevista) { this.dataPrevista = dataPrevista; }
@@ -56,9 +64,13 @@ public class Lancamento {
     public String getObservacoes() { return observacoes; }
     public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
     
-    public LocalDateTime getDataCriacao() { return dataCriacao; }
-    public void setDataCriacao(LocalDateTime dataCriacao) { this.dataCriacao = dataCriacao; }
+    // Campos para exibição
+    public String getNomePaciente() { return nomePaciente; }
+    public void setNomePaciente(String nomePaciente) { this.nomePaciente = nomePaciente; }
     
-    public LocalDateTime getDataAtualizacao() { return dataAtualizacao; }
-    public void setDataAtualizacao(LocalDateTime dataAtualizacao) { this.dataAtualizacao = dataAtualizacao; }
+    public String getNomeVacina() { return nomeVacina; }
+    public void setNomeVacina(String nomeVacina) { this.nomeVacina = nomeVacina; }
+    
+    public String getNomeMedicoAplicador() { return nomeMedicoAplicador; }
+    public void setNomeMedicoAplicador(String nomeMedicoAplicador) { this.nomeMedicoAplicador = nomeMedicoAplicador; }
 }

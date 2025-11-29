@@ -1,6 +1,9 @@
 // Medico.java
 package model;
-
+/**
+ *
+ * @author jeanm
+ */
 import java.time.LocalDateTime;
 
 public class Medico {

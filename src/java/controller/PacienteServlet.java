@@ -1,4 +1,3 @@
-// PacienteServlet.java - COMPLETO
 package controller;
 
 import java.io.IOException;

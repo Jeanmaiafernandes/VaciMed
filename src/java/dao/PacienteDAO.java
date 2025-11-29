@@ -1,4 +1,3 @@
-// PacienteDAO.java - COMPLETO E CORRIGIDO
 package dao;
 
 import model.Paciente;
@@ -40,7 +39,7 @@ public class PacienteDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace(); // 👈 Adicionar para debug
+            e.printStackTrace(); //  Adicionar para debug
             throw new RuntimeException("Erro ao inserir paciente: " + e.getMessage(), e);
         }
     }
@@ -87,6 +86,11 @@ public class PacienteDAO {
         }
         
         return null;
+    }
+    
+    // MÉTODO: buscarPorMedico (alias para listarPorMedico)
+    public List<Paciente> buscarPorMedico(int idMedico) {
+        return listarPorMedico(idMedico);
     }
     
     public List<Paciente> listarPorMedico(int idMedico) {

@@ -1,6 +1,8 @@
-// AutenticacaoService.java
 package service;
-
+/**
+ *
+ * @author jeanm
+ */
 import dao.MedicoDAO;
 import model.Medico;
 
